@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ public class LoginController {
      * 首页
      */
     @RequestMapping("/toIndexPage")
+    @ResponseBody
     public String toIndexPage() {
         //跳转至登录页面
         return "index.html";
@@ -33,6 +35,7 @@ public class LoginController {
      * 登录页面
      */
     @RequestMapping("/")
+    @ResponseBody
     public String toLoginPage() {
         //跳转至登录页面
         return "uuuu.html";
@@ -42,6 +45,7 @@ public class LoginController {
      * 登录
      */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @ResponseBody
     public String login(HttpServletRequest request, HttpServletResponse response,String tel, String password) {
         if ((password).equals((userService.findPasswordByTel(tel)))){
             /*最好可以用md5加密一下*/
