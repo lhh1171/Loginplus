@@ -1,50 +1,114 @@
 package com.example.demo.Util;
 
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.TokenExpiredException;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
+/**
+ * @Author: xiang
+ * @Date: 2021/5/11 21:11
+ * <p>
+ * JwtToken生成的工具类
+ * JWT token的格式：header.payload.signature
+ * header的格式（算法、token的类型）,默认：{"alg": "HS512","typ": "JWT"}
+ * payload的格式 设置：（用户信息、创建时间、生成时间）
+ * signature的生成算法：
+ * HMACSHA512(base64UrlEncode(header) + "." +base64UrlEncode(payload),secret)
+ */
+
+@Component
+@ConfigurationProperties(prefix = "jwt")
 public class JWTUtils {
 
-    private static final String jwtToken = "123456xxx!@#$$";
+    //定义token返回头部
+    public static String header;
 
-    public static String createToken(Long userId){
-        Map<String,Object> claims = new HashMap<>();
-        claims.put("userId",userId);
-        JwtBuilder jwtBuilder = Jwts.builder()
-                .signWith(SignatureAlgorithm.HS256, jwtToken) // 签发算法，秘钥为jwtToken
-                .setClaims(claims) // body数据，要唯一，自行设置
-                .setIssuedAt(new Date()) // 设置签发时间
-                .setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 60 * 1000));// 一天的有效时间
-        String token = jwtBuilder.compact();
-        return token;
+    //token前缀
+    public static String tokenPrefix;
+
+    //签名密钥
+    public static String secret;
+
+    //有效期
+    public static long expireTime;
+
+    //存进客户端的token的key名
+    public static final String USER_LOGIN_TOKEN = "USER_LOGIN_TOKEN";
+
+    public void setHeader(String header) {
+        JWTUtils.header = header;
     }
 
-    public static Map<String, Object> checkToken(String token){
+    public void setTokenPrefix(String tokenPrefix) {
+        JWTUtils.tokenPrefix = tokenPrefix;
+    }
+
+    public void setSecret(String secret) {
+        JWTUtils.secret = secret;
+    }
+
+    public void setExpireTime(int expireTimeInt) {
+        JWTUtils.expireTime = expireTimeInt*1000L*60;
+    }
+
+    /**
+     * 创建TOKEN
+     * @param sub
+     * @return
+     */
+    public static String createToken(String sub){
+        return tokenPrefix + JWT.create()
+                .withSubject(sub)
+                .withExpiresAt(new Date(System.currentTimeMillis() + expireTime))
+                .sign(Algorithm.HMAC512(secret));
+    }
+
+
+    /**
+     * 验证token
+     * @param token
+     */
+    public static String validateToken(String token){
         try {
-            Jwt parse = Jwts.parser().setSigningKey(jwtToken).parse(token);
-            return (Map<String, Object>) parse.getBody();
-        }catch (Exception e){
+            return JWT.require(Algorithm.HMAC512(secret))
+                    .build()
+                    .verify(token.replace(tokenPrefix, ""))
+                    .getSubject();
+        } catch (TokenExpiredException e){
+//            throw new ApiException(ResultInfo.unauthorized("token已经过期"));
             e.printStackTrace();
+        } catch (Exception e){
+//            throw new ApiException(ResultInfo.unauthorized("token验证失败"));
+            e.printStackTrace();
+        }finally {
+            return "error";
         }
-        return null;
     }
 
-//    public static void main(String[] args) {
-//        BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
-//        //加密所需的salt
-//        textEncryptor.setPassword("mszlu_blog_$#@wzb_&^%$#");
-//        //要加密的数据（数据库的用户名或密码）
-//        String username = textEncryptor.encrypt("root");
-//        String password = textEncryptor.encrypt("root");
-//        System.out.println("username:"+username);
-//        System.out.println("password:"+password);
-//        System.out.println(textEncryptor.decrypt("29cZ+X9cNmECjbLXT2P/BBZWReVl30NS"));
-//    }
-
+    /**
+     * 检查token是否需要更新
+     * @param token
+     * @return
+     */
+    public static boolean isNeedUpdate(String token){
+        //获取token过期时间
+        Date expiresAt = null;
+        try {
+            expiresAt = JWT.require(Algorithm.HMAC512(secret))
+                    .build()
+                    .verify(token.replace(tokenPrefix, ""))
+                    .getExpiresAt();
+        } catch (TokenExpiredException e){
+            return true;
+        } catch (Exception e){
+            throw new ApiException(ResultInfo.unauthorized("token验证失败"));
+        }
+        //如果剩余过期时间少于过期时常的一般时 需要更新
+        return (expiresAt.getTime()-System.currentTimeMillis()) < (expireTime>>1);
+    }
 }
+

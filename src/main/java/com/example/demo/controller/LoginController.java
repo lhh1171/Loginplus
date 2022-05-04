@@ -1,7 +1,12 @@
 package com.example.demo.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.example.demo.Util.JWTUtils;
+import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +16,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 登录控制器
@@ -21,6 +28,11 @@ import javax.servlet.http.HttpServletResponse;
 public class LoginController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RedisTemplate<String,String> redisTemplate;
+
+    private static final String slat = "mszlu!@#";
     /**
      * 首页
      */
@@ -46,22 +58,14 @@ public class LoginController {
      */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public String login(HttpServletRequest request, HttpServletResponse response,String tel, String password) {
+    public String login(HttpServletRequest request, HttpServletResponse response,String tel, String password) throws IOException {
         if ((password).equals((userService.findPasswordByTel(tel)))){
-            /*最好可以用md5加密一下*/
-            Cookie cookie1 = new Cookie("tel",tel);
-            Cookie cookie2 = new Cookie("password",password);
-            //设置有效时间--->10天
-            cookie1.setMaxAge(10*24*60*60);
-            cookie2.setMaxAge(10*24*60*60);
-            //设置关联路径
-            cookie1.setPath(request.getContextPath());
-            cookie2.setPath(request.getContextPath());
-            //发送Cookie给浏览器
-            response.addCookie(cookie1);
-            response.addCookie(cookie2);
-            System.out.println("index.html");
-            return "redirect:toIndexPage";
+            /*先用md5加密一下*/
+            password = DigestUtils.md5Hex(password + slat);
+            String token = JWTUtils.createToken(tel);
+            redisTemplate.opsForValue().set("TOKEN_"+token, JSON.toJSONString(password),1, TimeUnit.DAYS);
+            response.sendRedirect("/index.html");
+            return "toIndexPage";
         } else {
             return "error";
         }

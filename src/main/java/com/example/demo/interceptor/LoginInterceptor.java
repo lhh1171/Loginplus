@@ -1,8 +1,11 @@
 package com.example.demo.interceptor;
+import com.alibaba.fastjson.JSON;
+import com.example.demo.Util.UserThreadLocal;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -21,6 +24,8 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Resource
     private UserService userService;
+    @Autowired
+    private RedisTemplate<String,String> redisTemplate;
 
     private static   LoginInterceptor loginInterceptor;
 
@@ -31,38 +36,34 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        String token = request.getHeader("Authorization");
         String uri = request.getRequestURI();
         //判断当前请求地址是否登录地址
-        if(uri.contains("login") || uri.contains("toLoginPage")) {
+        if(uri.contains("login") || uri.contains("toIndexPage")) {
             //登录请求，直接放行
             return true;
         } else {
-                //说明已经登录，放行
-                //从request中获取所有的Cookie
-                Cookie[] cookies = request.getCookies();
-                String tel = null;
-                String password =null;
-                if (cookies!=null){
-                    for(Cookie cookie:cookies){
-                        String cookieName = cookie.getName();
-                        String cookieValue = cookie.getValue();
-                        if ("tel".equals(cookieName)){
-                            tel = cookieValue;
-                        }else if ("password".equals(cookieName)){
-                            password = cookieValue;
-                        }
-                    }
-                }
-                //没有用户登录过，或者cookie过期
-                if (tel == null||password==null){
-                    response.sendRedirect("/uuuu.html");
+            if (token==null){
+                response.sendRedirect("/uuuu.html");
+                return false;
+            }else {
+                String userJson = redisTemplate.opsForValue().get("TOKEN_" + token);
+                String password= JSON.parseObject(userJson,String.class);
+                if (password==null){
                     return false;
-                } else {
-                    //检验密码是否正确，防止伪造cookie
-                    return (password).equals((loginInterceptor.userService.findPasswordByTel(tel)));
                 }
+                //登录验证成功，放行
+                //我希望在controller中 直接获取用户的信息 怎么获取?
+                UserThreadLocal.put(password);
+                return true;
+            }
         }
-
+    }
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        //如果不删除 ThreadLocal中用完的信息 会有内存泄漏的风险
+        System.out.println("remove the user>>>>");
+        UserThreadLocal.remove();
     }
 
 }

@@ -78,7 +78,7 @@ button2.addEventListener('click',()=>{
 		},
 
 		success: function (data) {
-			if (data === "index.html") {
+			if (data === "redirect:toIndexPage") {
 				alert(data);
 				window.location.href="/index.html";
 			} else {
