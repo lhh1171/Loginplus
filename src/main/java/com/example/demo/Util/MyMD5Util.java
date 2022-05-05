@@ -102,11 +102,11 @@ public class MyMD5Util {
         return byteToHexString(pwd);
     }
 }
-class test{
-    public static void main(String[] args) throws  NoSuchAlgorithmException {
-        String password=MyMD5Util.getEncryptedPwd("password");
-        System.out.println(password);
-        System.out.println(MyMD5Util.validPassword("password", "B57B45CA6B1B4C8377299E184B43896217A982DD7F1CB8B725335BB2"));
-    }
-}
+//class test{
+//    public static void main(String[] args) throws  NoSuchAlgorithmException {
+//        String password=MyMD5Util.getEncryptedPwd("password");
+//        System.out.println(password);
+//        System.out.println(MyMD5Util.validPassword("password", "B57B45CA6B1B4C8377299E184B43896217A982DD7F1CB8B725335BB2"));
+//    }
+//}
 

@@ -35,9 +35,9 @@ public class WebMvcConfig implements WebMvcConfigurer
 
         registration.addPathPatterns("/**"); //所有路径都被拦截
         registration.excludePathPatterns(//添加不拦截路径
-                "/toLoginPage",           //登录页面
-                "/uuuu.html",               //登录请求
-//                "/**/*.html",             //html静态资源
+                "/login",//登录页面
+                "/",
+                "/uuuu.html",            //登录请求
                 "/**/*.js",               //js静态资源
                 "/img/*",               //img静态资源
                 "/**/*.css"               //css静态资源

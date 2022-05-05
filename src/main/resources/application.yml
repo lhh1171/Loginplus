@@ -4,15 +4,4 @@ spring:
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
-#  mvc:
-#    view:
-#      prefix: /
-#      suffix: .html
-  thymeleaf:
-    check-template: false
-    check-template-location: false
-    mode: HTML5
-    encoding: UTF-8
-    cache: false
-    servlet:
-      content-type: text/html
+

@@ -25,6 +25,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web-services</artifactId>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>org.springframework.session</groupId>-->
 <!--            <artifactId>spring-session-jdbc</artifactId>-->
@@ -90,11 +94,11 @@
             <version>2.9.2</version>
         </dependency>
 
-        <!-- Thymeleaf 的依赖-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
+<!--        &lt;!&ndash; Thymeleaf 的依赖&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-thymeleaf</artifactId>-->
+<!--        </dependency>-->
 
         <!--MD5加密 对注册的密码进行加密操作-->
         <dependency>

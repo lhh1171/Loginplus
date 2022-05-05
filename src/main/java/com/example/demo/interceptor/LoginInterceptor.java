@@ -38,15 +38,11 @@ public class LoginInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String token = request.getHeader("Authorization");
         String uri = request.getRequestURI();
-        //判断当前请求地址是否登录地址
-        if(uri.contains("login") || uri.contains("toIndexPage")) {
-            //登录请求，直接放行
-            return true;
-        } else {
             if (token==null){
-                response.sendRedirect("/uuuu.html");
+                System.out.println("the token is null!!!");
                 return false;
             }else {
+                System.out.println("TOKEN_" + token);
                 String userJson = redisTemplate.opsForValue().get("TOKEN_" + token);
                 String password= JSON.parseObject(userJson,String.class);
                 if (password==null){
@@ -57,7 +53,6 @@ public class LoginInterceptor implements HandlerInterceptor {
                 UserThreadLocal.put(password);
                 return true;
             }
-        }
     }
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
@@ -65,5 +60,4 @@ public class LoginInterceptor implements HandlerInterceptor {
         System.out.println("remove the user>>>>");
         UserThreadLocal.remove();
     }
-
 }
