@@ -84,6 +84,18 @@ public class LoginController {
     public String logout(HttpServletRequest request) {
 //        //删除cookie
 //        Cookie[] cookies = request.getCookies();
+        //cookie设置跨域，必须在同一个domain下
+//        resp.setHeader("Access-Control-Allow-Credentials", "true");
+//        当异步对象设置了withCredentials=true时，浏览器会保留下响应的Cookie等信息
+//        $.ajax({
+//           url: "http://localhost:8080/corscookie",
+//          type: "GET",
+//          xhrFields: {
+//              withCredentials: true
+//           },
+//    crossDomain: true
+//});
+//        cookie.setDomain("localhost:8080");
 //        for (Cookie cookie:cookies){
 //            String cookieName = cookie.getName();
 //            if ("tel".equals(cookieName)||"password".equals(cookieName)){

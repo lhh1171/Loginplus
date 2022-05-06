@@ -23,7 +23,8 @@ public interface UserMapper {
     List<User> findAll();
 
     @Insert("INSERT INTO user(name,password,tel) VALUES( #{name},#{password},#{tel})")
-    void insert(@Param("name") String name,@Param("password") String password,@Param("tel") String tel);
+    void insert(@Param("name") String name,@Param("password") String password,
+                @Param("tel") String tel);
 
     @Delete("DELETE FROM user WHERE uid =#{uid}")
     int delete(String uid);

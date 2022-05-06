@@ -21,6 +21,7 @@ loginBtn.addEventListener('click', (e) => {
 button2.addEventListener('click',()=>{
 	const a = document.getElementById("tel2").value;
 	const b = document.getElementById("password2").value;
+	const au = localStorage.getItem("LQC_Authorization");
 	$.ajax({
 		url: "/login",
 		type: 'POST',
@@ -33,9 +34,15 @@ button2.addEventListener('click',()=>{
 		xhrFields: {
 			withCredentials: true //允许跨域带Cookie
 		},
-		success: function (result) {
-			console.log(result);
-			if (result==="ss") {
+		beforeSend: function (xhr) {
+				alert(au);
+				xhr.setRequestHeader('Authorization', au);
+		},
+		success: function (data,textStatus, request) {
+			localStorage.setItem("LQC_Authorization",request.getResponseHeader('Authorization'));
+			// console.log(result.getAllResponseHeaders());
+			// localStorage.setItem("LQC_Authorization",request.getResponseHeader('Authorization'));
+			if (data==="ss") {
 				location.href="/index.html";
 			} else {
 				alert("1error");
